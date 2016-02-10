@@ -1,0 +1,123 @@
+{
+  "description": "DS / Vagrant / CentOS 7.1",
+  "_comment": "This builds a CentOS71 box from scratch using the vmware-iso and virtualbox providers.",
+  "push": {
+    "name": "",
+    "vcs": false,
+    "exclude": [
+      ".git",
+      ".DS_Store"
+    ]
+  },
+  "variables": {
+  	"build_version": "0.1.0",
+    "atlas_username": "{{env `ATLAS_USERNAME`}}",
+    "atlas_name": "{{env `ATLAS_NAME`}}",
+    "vmmem": "512",
+    "vmvcpus": "1",
+    "isodownloadurl": "http://mirror.ox.ac.uk/sites/mirror.centos.org/7/isos/x86_64/CentOS-7-x86_64-Minimal-1511.iso"
+  },
+  "builders": [
+    {
+      "type": "virtualbox-iso",
+      "vm_name": "vagrant-centos71-vboxiso",
+      "guest_os_type": "RedHat_64",
+      "headless": "false",
+      "iso_url": "{{user `isodownloadurl`}}",
+      "iso_checksum_type": "none",
+      "http_directory": "scripts",
+      "boot_command": [
+        "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg<enter><wait>"
+      ],
+      "boot_wait": "10s",
+      "hard_drive_interface": "ide",
+      "disk_size": 40520,
+      "format": "ova",
+      "ssh_username": "vagrant",
+      "ssh_password": "vagrant",
+      "ssh_port": 22,
+      "ssh_wait_timeout": "10000s",
+      "shutdown_command": "sudo -S shutdown -P now",
+      "shutdown_timeout": "2m",
+      "guest_additions_mode": "upload",
+      "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+      "virtualbox_version_file": ".vbox_version",
+      "vboxmanage": [
+        [ "modifyvm", "{{.Name}}", "--memory", "{{user `vmmem`}}" ],
+        [ "modifyvm", "{{.Name}}", "--cpus", "{{user `vmvcpus`}}" ]
+      ]
+    },
+    {
+      "type": "vmware-iso",
+      "vm_name": "vagrant-centos71-vmwiso",
+      "guest_os_type": "centos-64",
+      "headless": "false",
+      "iso_url": "{{user `isodownloadurl`}}",
+      "iso_checksum_type": "none",
+      "http_directory": "scripts",
+      "boot_command": [
+        "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg<enter><wait>"
+      ],
+      "boot_wait": "10s",
+      "disk_size": "20480",
+      "disk_type_id": "1",
+      "communicator": "ssh",
+      "ssh_username": "vagrant",
+      "ssh_password": "vagrant",
+      "ssh_port": "22",
+      "ssh_wait_timeout": "10000s",
+      "shutdown_command": "sudo -S shutdown -P now",
+      "shutdown_timeout": "2m",
+      "tools_upload_flavor": "linux",
+      "version": "9",
+      "vmx_data": {
+        "memsize": "{{user `vmmem`}}",
+        "numvcpus": "{{user `vmvcpus`}}",
+        "cpuid.coresPerSocket": "1"
+      }
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "ansible-local",
+  	  "playbook_file": "centos71.yml"
+    }
+  ],
+  "post-processors": [
+    [{
+      "type": "vagrant",
+      "keep_input_artifact": false,
+      "vagrantfile_template": "./Vagrantfile.template",
+      "override": {
+        "virtualbox": {
+          "output": "centos-7-1-x64-virtualbox.box"
+        },
+        "vmware": {
+          "output": "centos-7-1-x64-vmware.box"
+        }
+      }
+    },
+    {
+      "type": "atlas",
+      "only": ["vmware-iso"],
+      "artifact": "{{user `atlas_username`}}/{{user `atlas_name`}}",
+      "artifact_type": "vagrant.box",
+      "metadata": {
+      "provider": "vmware_desktop",
+      "version": "{{user `build_version`}}",
+      "created_at": "{{timestamp}}"
+      }
+    },
+    {
+      "type": "atlas",
+      "only": ["virtualbox-iso"],
+      "artifact": "{{user `atlas_username`}}/{{user `atlas_name`}}",
+      "artifact_type": "vagrant.box",
+      "metadata": {
+      "provider": "virtualbox",
+      "version": "{{user `build_version`}}",
+      "created_at": "{{timestamp}}"
+      }
+    }]
+  ]
+}

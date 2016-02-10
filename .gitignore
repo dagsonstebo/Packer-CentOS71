@@ -1,0 +1,9 @@
+# OSX
+[Tt]humbs.db
+*.DS_Store
+
+# Packer
+packer_cache/
+*.box
+*.key
+scrapbook
