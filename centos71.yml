@@ -48,7 +48,7 @@
       when: ansible_product_name == "VirtualBox" 
       
     - name: Fix VirtualBox additions install issues
-      shell: {{ item }}
+      shell: "{{ item }}"
       with_items:
         - export MAKE='/usr/bin/gmake -i'
         - ln -s /usr/include/drm/drm.h /usr/src/kernels/`uname -r`/include/drm/drm.h
