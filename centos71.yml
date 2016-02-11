@@ -43,7 +43,7 @@
       when: ansible_product_name == "VirtualBox" 
       
     - name: Install kernel-devel
-      yum: kernel-devel-{{ item }}
+      yum: kernel-devel-{{ item }}  state=present
       with_items: kernel_version.stdout  
       when: ansible_product_name == "VirtualBox" 
         
