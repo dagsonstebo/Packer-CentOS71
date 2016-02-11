@@ -30,6 +30,7 @@
         - autoconf
         - perl
         - dkms
+        - bzip2
       when: ansible_product_name == "VirtualBox" 
         
     - name: upgrade all packages
