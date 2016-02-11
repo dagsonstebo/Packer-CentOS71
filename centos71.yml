@@ -32,6 +32,20 @@
         - dkms
         - bzip2
       when: ansible_product_name == "VirtualBox" 
+      
+    - name: Find kernel version
+      shell: uname -r
+      register: kernel_version
+      when: ansible_product_name == "VirtualBox" 
+      
+    - name: Register KERN_DIR
+      shell: export KERN_DIR=/usr/src/kernels/`uname -r`
+      when: ansible_product_name == "VirtualBox" 
+      
+    - name: Install kernel-devel
+      yum: kernel-devel-{{ item }}
+      with_items: kernel_version.stdout  
+      when: ansible_product_name == "VirtualBox" 
         
     - name: upgrade all packages
       yum: name=* state=latest
