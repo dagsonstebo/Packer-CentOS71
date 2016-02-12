@@ -76,17 +76,6 @@
       with_items: kernel_version.stdout  
       when: ansible_product_name == "VirtualBox" 
       
-    - name: Fix VirtualBox additions install issues
-      shell: "{{ item }}"
-      with_items:
-        - export KERN_DIR=/usr/src/kernels/`uname -r`
-        - export MAKE='/usr/bin/gmake -i'
-        - ln -s /usr/include/drm/drm.h /usr/src/kernels/`uname -r`/include/drm/drm.h
-        - ln -s /usr/include/drm/drm_sarea.h /usr/src/kernels/`uname -r`/include/drm/drm_sarea.h
-        - ln -s /usr/include/drm/drm_mode.h /usr/src/kernels/`uname -r`/include/drm/drm_mode.h
-        - ln -s /usr/include/drm/drm_fourcc.h /usr/src/kernels/`uname -r`/include/drm/drm_fourcc.h
-      when: ansible_product_name == "VirtualBox" 
-      
     - name: Find VirtualBox additions iso
       shell: ls /home/vagrant/ | grep VBoxGuest
       register: vbox_additions_iso
@@ -96,17 +85,19 @@
       mount: name=/mnt/vboxtools src=/home/vagrant/{{ item }} fstype=iso9660 opts=loop state=mounted
       with_items: vbox_additions_iso.stdout
       when: ansible_product_name == "VirtualBox" 
-      ignore_errors: yes  
-      
-    - name: Set kernel-devel folder
-      shell: export KERN_DIR=/usr/src/kernels/`uname -r`  
-      when: ansible_product_name == "VirtualBox" 
-      ignore_errors: yes    
+      ignore_errors: yes   
 
-    - name: Install VirtualBox additions
-      shell: /mnt/vboxtools/VBoxLinuxAdditions.run
+    - name: VirtualBox additions install
+      shell: "{{ item }}"
+      with_items:
+        - export KERN_DIR=/usr/src/kernels/`uname -r`
+        - export MAKE='/usr/bin/gmake -i'
+        - ln -s /usr/include/drm/drm.h /usr/src/kernels/`uname -r`/include/drm/drm.h
+        - ln -s /usr/include/drm/drm_sarea.h /usr/src/kernels/`uname -r`/include/drm/drm_sarea.h
+        - ln -s /usr/include/drm/drm_mode.h /usr/src/kernels/`uname -r`/include/drm/drm_mode.h
+        - ln -s /usr/include/drm/drm_fourcc.h /usr/src/kernels/`uname -r`/include/drm/drm_fourcc.h
+        - /mnt/vboxtools/VBoxLinuxAdditions.run
       when: ansible_product_name == "VirtualBox" 
-      ignore_errors: yes    
       
     - name: Umount VirtualBox tools
       mount: name=/mnt/vboxtools src=/home/vagrant/{{ item }} fstype=iso9660 opts=loop state=unmounted
