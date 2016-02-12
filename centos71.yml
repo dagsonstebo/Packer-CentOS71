@@ -98,6 +98,7 @@
         - ln -s /usr/include/drm/drm_fourcc.h /usr/src/kernels/`uname -r`/include/drm/drm_fourcc.h
         - /mnt/vboxtools/VBoxLinuxAdditions.run
       when: ansible_product_name == "VirtualBox" 
+      ignore_errors: yes
       
     - name: Umount VirtualBox tools
       mount: name=/mnt/vboxtools src=/home/vagrant/{{ item }} fstype=iso9660 opts=loop state=unmounted
