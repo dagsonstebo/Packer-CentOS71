@@ -87,16 +87,25 @@
       when: ansible_product_name == "VirtualBox" 
       ignore_errors: yes   
 
-    - name: VirtualBox additions install
+    - name: VirtualBox additions prereqs
       shell: "{{ item }}"
       with_items:
-        - export KERN_DIR=/usr/src/kernels/`uname -r`
-        - export MAKE='/usr/bin/gmake -i'
+        # - export KERN_DIR=/usr/src/kernels/`uname -r`
+        # - export MAKE='/usr/bin/gmake -i'
+        # - export MAKE='/usr/bin/gmake -i'
         - ln -s /usr/include/drm/drm.h /usr/src/kernels/`uname -r`/include/drm/drm.h
         - ln -s /usr/include/drm/drm_sarea.h /usr/src/kernels/`uname -r`/include/drm/drm_sarea.h
         - ln -s /usr/include/drm/drm_mode.h /usr/src/kernels/`uname -r`/include/drm/drm_mode.h
         - ln -s /usr/include/drm/drm_fourcc.h /usr/src/kernels/`uname -r`/include/drm/drm_fourcc.h
-        - /mnt/vboxtools/VBoxLinuxAdditions.run
+        # - /mnt/vboxtools/VBoxLinuxAdditions.run
+      when: ansible_product_name == "VirtualBox" 
+      ignore_errors: yes
+      
+    - name: VirtualBox additions install
+      shell: /mnt/vboxtools/VBoxLinuxAdditions.run
+      environment:
+        KERN_DIR: /usr/src/kernels/`uname -r`
+        MAKE: /usr/bin/gmake -i
       when: ansible_product_name == "VirtualBox" 
       ignore_errors: yes
       
