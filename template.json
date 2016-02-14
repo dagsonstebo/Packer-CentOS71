@@ -1,5 +1,5 @@
 {
-  "description": "DS / Vagrant / CentOS 7.1",
+  "description": "DS / Vagrant / CentOS 7.x",
   "_comment": "This builds a CentOS71 box from scratch using the vmware-iso and virtualbox providers.",
   "push": {
     "name": "",
@@ -10,7 +10,7 @@
     ]
   },
   "variables": {
-  	"build_version": "0.1.21",
+  	"build_version": "0.1.40",
     "atlas_username": "{{env `ATLAS_USERNAME`}}",
     "atlas_name": "{{env `ATLAS_NAME`}}",
     "vmmem": "512",
@@ -80,7 +80,7 @@
   "provisioners": [
     {
       "type": "ansible-local",
-  	  "playbook_file": "scripts/centos71.yml"
+  	  "playbook_file": "scripts/centos7x.yml"
     },
     {
   		"type": "file",

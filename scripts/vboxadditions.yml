@@ -3,6 +3,9 @@
   sudo: yes
   connection: local
 
+  vars:
+    RemoveISO: false
+    
   tasks:
     - name: Install pre-reqs for VirtualBox tools
       yum: name={{ item }} state=present
@@ -66,5 +69,5 @@
     - name: Post VirtualBox tools installation housekeeping
       file: path=/home/vagrant/{{ item }} state=absent
       with_items: vbox_additions_iso.stdout
-      when: ansible_product_name == "VirtualBoxtttt" 
+      when: ansible_product_name == "VirtualBox" and RemoveISO
       ignore_errors: yes
