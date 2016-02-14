@@ -1,6 +1,6 @@
 {
   "description": "DS / Vagrant / CentOS 7.x",
-  "_comment": "This builds a CentOS71 box from scratch using the vmware-iso and virtualbox providers.",
+  "_comment": "This builds a CentOS72 box from scratch using the vmware-iso and virtualbox providers.",
   "push": {
     "name": "",
     "vcs": false,
@@ -10,7 +10,7 @@
     ]
   },
   "variables": {
-  	"build_version": "0.1.50",
+  	"build_version": "0.1.52",
     "atlas_username": "{{env `ATLAS_USERNAME`}}",
     "atlas_name": "{{env `ATLAS_NAME`}}",
     "vmmem": "512",
@@ -20,7 +20,7 @@
   "builders": [
     {
       "type": "virtualbox-iso",
-      "vm_name": "vagrant-centos71-vboxiso",
+      "vm_name": "vagrant-centos72-vboxiso",
       "guest_os_type": "RedHat_64",
       "headless": "false",
       "iso_url": "{{user `isodownloadurl`}}",
@@ -49,7 +49,7 @@
     },
     {
       "type": "vmware-iso",
-      "vm_name": "vagrant-centos71-vmwiso",
+      "vm_name": "vagrant-centos72-vmwiso",
       "guest_os_type": "centos-64",
       "headless": "false",
       "iso_url": "{{user `isodownloadurl`}}",
@@ -81,12 +81,7 @@
     {
       "type": "ansible-local",
   	  "playbook_file": "scripts/centos7x.yml"
-    },
-    {
-  		"type": "file",
-  		"source": "scripts/vboxadditions.yml",
-  		"destination": "/home/vagrant/vboxadditions.yml"
-	}
+    }
   ],
   "post-processors": [
     [{
@@ -95,10 +90,10 @@
       "vagrantfile_template": "./Vagrantfile.template",
       "override": {
         "virtualbox": {
-          "output": "centos-7-1-x64-virtualbox.box"
+          "output": "centos-7-2-x64-virtualbox.box"
         },
         "vmware": {
-          "output": "centos-7-1-x64-vmware.box"
+          "output": "centos-7-2-x64-vmware.box"
         }
       }
     },

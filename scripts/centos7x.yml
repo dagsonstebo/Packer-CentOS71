@@ -7,10 +7,9 @@
     RemoveISO: false
 
   tasks:
-    - name: Install EPEL repo / python-pip / vim / tree / ntp / wget
+    - name: Install python-pip / vim / tree / ntp / wget
       yum: name={{ item }} state=present
       with_items:
-        - epel-release
         - python-pip
         - vim
         - tree
@@ -43,7 +42,7 @@
       shell: date > /etc/vagrant_box_build_time
       
     - name: Environment notification
-      lineinfile: dest=/etc/motd line="CentOS 7.x Vagrant box, built with Packer/Atlas."
+      lineinfile: dest=/etc/motd line="\n\nCentOS 7.x Vagrant box, built with Packer/Atlas.\n\n"
       
     - name: Clean old DHCP leases and udev rules, create tools mountpoint
       file: path={{ item.path }} state={{ item.action }}
@@ -54,7 +53,10 @@
         
     - name: Remove MAC addresses in network scripts
       shell: sed -i "s/HWADDR=.*//" /etc/sysconfig/network-scripts/ifcfg-*
-      
+    
+    ######################################################################################
+    # VirtualBox additions install  
+    #
     - block:
       - name: Install pre-reqs for VirtualBox tools
         yum: name={{ item }} state=present
@@ -102,14 +104,19 @@
       - name: Umount VirtualBox tools
         mount: name=/mnt/vboxtools src=/home/vagrant/{{ item }} fstype=iso9660 opts=loop state=unmounted
         with_items: vbox_additions_iso.stdout
+        
+      - name: Remove VirtualBox tools mount point
+        mount: name=/mnt/vboxtools src=/home/vagrant/{{ item }} fstype=iso9660 opts=loop state=absent
+        with_items: vbox_additions_iso.stdout
       
-      - name: Post VirtualBox tools installation housekeeping
+      - name: Remove VirtualBox ISO
         file: path=/home/vagrant/{{ item }} state=absent
         with_items: vbox_additions_iso.stdout
         when: ansible_product_name == "VirtualBox" and RemoveISO
 
       when: ansible_product_name == "VirtualBox" 
       ignore_errors: yes
+      ####################################################################################
 
     - name: Zero out disk to save space in final image
       shell: dd if=/dev/zero of=/EMPTY bs=1M; sync; rm -f /EMPTY; sync
