@@ -1,57 +1,9 @@
-- name: CentOS 7.x Base Build Playbook
+- name: VirtualBox Additions Playbook
   hosts: 127.0.0.1
   sudo: yes
   connection: local
 
   tasks:
-    - name: Install EPEL repo / python-pip / vim / tree / ntp / wget
-      yum: name={{ item }} state=present
-      with_items:
-        - epel-release
-        - python-pip
-        - vim
-        - tree
-        - ntp
-        - wget
-        
-    - name: Install VMWare tools
-      yum: name=open-vm-tools state=present
-      when: ansible_product_name == "VMware Virtual Platform"
-      ignore_errors: yes
-                
-    - name: upgrade all packages
-      yum: name=* state=latest
-      
-    - name: Configure NTP
-      service: name=ntpd enabled=yes state=started  
-      
-    - name: No DNS for ssh
-      lineinfile: dest=/etc/ssh/sshd_config line="UseDNS no"
-       
-    - name: Download Hashicorp public key
-      shell: wget https://raw.githubusercontent.com/mitchellh/vagrant/master/keys/vagrant.pub
-      ignore_errors: yes       
-        
-    - name: Install Hashicorp public key
-      authorized_key: user=vagrant key="{{ lookup('file', 'vagrant.pub') }}"
-      ignore_errors: yes
-      
-    - name: Note Vagrant build time
-      shell: date > /etc/vagrant_box_build_time
-      
-    - name: Environment notification
-      lineinfile: dest=/etc/motd line="CentOS 7.1 Vagrant box, built with Packer/Atlas."
-      
-    - name: Clean old DHCP leases and udev rules, create tools mountpoint
-      file: path={{ item.path }} state={{ item.action }}
-      with_items:
-        - { path: '/var/lib/dhclient/*', action: 'absent' }
-        - { path: '/etc/udev/rules.d/70-persistent-net.rules', action: 'absent' }
-        - { path: '/etc/udev/rules.d/70-persistent-net.rules', action: 'directory' }
-        
-    - name: Remove MAC addresses in network scripts
-      shell: sed -i "s/HWADDR=.*//" /etc/sysconfig/network-scripts/ifcfg-*
-      
     - name: Install pre-reqs for VirtualBox tools
       yum: name={{ item }} state=present
       with_items:
@@ -90,14 +42,10 @@
     - name: VirtualBox additions prereqs
       shell: "{{ item }}"
       with_items:
-        # - export KERN_DIR=/usr/src/kernels/`uname -r`
-        # - export MAKE='/usr/bin/gmake -i'
-        # - export MAKE='/usr/bin/gmake -i'
         - ln -s /usr/include/drm/drm.h /usr/src/kernels/`uname -r`/include/drm/drm.h
         - ln -s /usr/include/drm/drm_sarea.h /usr/src/kernels/`uname -r`/include/drm/drm_sarea.h
         - ln -s /usr/include/drm/drm_mode.h /usr/src/kernels/`uname -r`/include/drm/drm_mode.h
         - ln -s /usr/include/drm/drm_fourcc.h /usr/src/kernels/`uname -r`/include/drm/drm_fourcc.h
-        # - /mnt/vboxtools/VBoxLinuxAdditions.run
       when: ansible_product_name == "VirtualBox" 
       ignore_errors: yes
       
@@ -119,8 +67,4 @@
       file: path=/home/vagrant/{{ item }} state=absent
       with_items: vbox_additions_iso.stdout
       when: ansible_product_name == "VirtualBoxtttt" 
-      ignore_errors: yes      
-      
-    - name: Zero out disk to save space in final image
-      shell: dd if=/dev/zero of=/EMPTY bs=1M; sync; rm -f /EMPTY; sync
       ignore_errors: yes

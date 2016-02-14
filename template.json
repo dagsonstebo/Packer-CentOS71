@@ -10,7 +10,7 @@
     ]
   },
   "variables": {
-  	"build_version": "0.1.12",
+  	"build_version": "0.1.20",
     "atlas_username": "{{env `ATLAS_USERNAME`}}",
     "atlas_name": "{{env `ATLAS_NAME`}}",
     "vmmem": "512",
@@ -80,8 +80,13 @@
   "provisioners": [
     {
       "type": "ansible-local",
-  	  "playbook_file": "centos71.yml"
-    }
+  	  "playbook_file": "scripts/centos71.yml"
+    },
+    {
+  		"type": "file",
+  		"source": "scripts/vboxadditions.yml",
+  		"destination": "/home/vagrant/vboxadditions.yml"
+	}
   ],
   "post-processors": [
     [{
