@@ -5,6 +5,7 @@ Vagrant.configure(2) do |config|
   config.vm.post_up_message = "centos1.vagrant.local is up and running"
   config.vm.synced_folder ".", "/vagrant", disabled: true
   config.vm.provision "ansible_local" do |ansible|
-    ansible.playbook = "/home/vagrant/vboxadditions.yml"
+    ansible.playbook = "vboxadditions.yml"
+    provisioning_path = "/home/vagrant"
   end
 end
