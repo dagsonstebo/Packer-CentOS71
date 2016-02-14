@@ -1,7 +1,10 @@
-- name: CentOS 7.x Base Build Playbook
+- name: CentOS 7.x Base Build Playbook (Ansible 2.0)
   hosts: 127.0.0.1
   sudo: yes
   connection: local
+  
+  vars:
+    RemoveISO: false
 
   tasks:
     - name: Install EPEL repo / python-pip / vim / tree / ntp / wget
@@ -52,6 +55,62 @@
     - name: Remove MAC addresses in network scripts
       shell: sed -i "s/HWADDR=.*//" /etc/sysconfig/network-scripts/ifcfg-*
       
+    - block:
+      - name: Install pre-reqs for VirtualBox tools
+        yum: name={{ item }} state=present
+        with_items:
+          - gcc 
+          - gcc-c++ 
+          - kernel-devel
+          - kernel-headers
+          - make
+          - autoconf
+          - perl
+          - dkms
+          - bzip2
+      
+      - name: Find kernel version
+        shell: uname -r
+        register: kernel_version
+      
+      - name: Install kernel-devel
+        yum: name=kernel-devel-{{ item }}  state=present
+        with_items: kernel_version.stdout  
+      
+      - name: Find VirtualBox additions iso
+        shell: ls /home/vagrant/ | grep VBoxGuest
+        register: vbox_additions_iso
+    
+      - name: Mount VirtualBox tools
+        mount: name=/mnt/vboxtools src=/home/vagrant/{{ item }} fstype=iso9660 opts=loop state=mounted
+        with_items: vbox_additions_iso.stdout
+  
+      - name: VirtualBox additions prereqs
+        shell: "{{ item }}"
+        with_items:
+          - ln -s /usr/include/drm/drm.h /usr/src/kernels/`uname -r`/include/drm/drm.h
+          - ln -s /usr/include/drm/drm_sarea.h /usr/src/kernels/`uname -r`/include/drm/drm_sarea.h
+          - ln -s /usr/include/drm/drm_mode.h /usr/src/kernels/`uname -r`/include/drm/drm_mode.h
+          - ln -s /usr/include/drm/drm_fourcc.h /usr/src/kernels/`uname -r`/include/drm/drm_fourcc.h
+      
+      - name: VirtualBox additions install
+        shell: /mnt/vboxtools/VBoxLinuxAdditions.run
+        environment:
+          KERN_DIR: /usr/src/kernels/`uname -r`
+          MAKE: /usr/bin/gmake -i
+       
+      - name: Umount VirtualBox tools
+        mount: name=/mnt/vboxtools src=/home/vagrant/{{ item }} fstype=iso9660 opts=loop state=unmounted
+        with_items: vbox_additions_iso.stdout
+      
+      - name: Post VirtualBox tools installation housekeeping
+        file: path=/home/vagrant/{{ item }} state=absent
+        with_items: vbox_additions_iso.stdout
+        when: ansible_product_name == "VirtualBox" and RemoveISO
+
+      when: ansible_product_name == "VirtualBox" 
+      ignore_errors: yes
+
     - name: Zero out disk to save space in final image
       shell: dd if=/dev/zero of=/EMPTY bs=1M; sync; rm -f /EMPTY; sync
       ignore_errors: yes
