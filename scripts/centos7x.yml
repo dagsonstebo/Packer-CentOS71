@@ -42,7 +42,7 @@
       shell: date > /etc/vagrant_box_build_time
       
     - name: Environment notification
-      lineinfile: dest=/etc/motd line="\n\nCentOS 7.x Vagrant box, built with Packer/Atlas.\n\n"
+      lineinfile: dest=/etc/motd line="\n\nCentOS 7.2 Vagrant box, built with Packer/Atlas.\n\n"
       
     - name: Clean old DHCP leases and udev rules, create tools mountpoint
       file: path={{ item.path }} state={{ item.action }}

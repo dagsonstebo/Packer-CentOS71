@@ -10,7 +10,7 @@
     ]
   },
   "variables": {
-  	"build_version": "0.1.52",
+  	"build_version": "0.1.53",
     "atlas_username": "{{env `ATLAS_USERNAME`}}",
     "atlas_name": "{{env `ATLAS_NAME`}}",
     "vmmem": "512",
