@@ -1,4 +1,4 @@
-- name: CentOS 7.x Base Build Playbook (Ansible 2.0)
+- name: CentOS 6/7 Base Build Playbook (Ansible 2.0)
   hosts: 127.0.0.1
   sudo: yes
   connection: local
